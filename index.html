@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>Mutation Observer</h1>
+    <ul class="summary">
+        <li>React to changes in DOM</li>
+        <li>
+            <ul>
+                <li>an attribute or text has changed on an element</li>
+                <li>another element was added or removed from parent element</li>
+            </ul>
+        </li>
+        <li>Helpful when libraries dont provide their own events</li>
+    </ul>
+
+    <script>
+        const myList = document.querySelector('.summary');
+        // make new mutation observer object
+        // tell it what to observe (attributes)
+        // what to do with observed changes / mutation
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach((mutationRecord) => {
+                console.log(mutationRecord);
+
+                // Attribute Changes
+                if (mutationRecord.type === "attributes") {
+                    const changedAttrName = mutationRecord.attributeName;
+                    const newValue = mutationRecord.target.getAttribute(changedAttrName);
+                    console.log(`Attribute changed! New value for ${changedAttrName}: ${newValue}`)
+                }
+
+                // Child List Changes
+                if (mutationRecord.type === 'childList') {
+                    // Added / Removed Child Node changes
+                    if (mutationRecord.addedNodes.length > 0) {
+                        console.log(`Number of added nodes: ${mutationRecord.addedNodes.length}`);
+                    }
+
+                    if (mutationRecord.removedNodes.length > 0) {
+                        console.log(`Number of removed nodes: ${mutationRecord.removedNodes.length}`);
+                    }
+
+                    // Text Changes
+                    if (mutationRecord.addedNodes.length === 1 && mutationRecord.addedNodes[0].nodeType === Node.TEXT_NODE
+                        && mutationRecord.removedNodes[0].nodeType === Node.TEXT_NODE) {
+                        console.log(`Text Changed from  ${mutationRecord.removedNodes[0].nodeValue} to  ${mutationRecord.addedNodes[0].nodeValue}`)
+                    }
+                }
+
+                // character data. updates in place of node text
+                if (mutationRecord.type === "characterData") {
+                    console.log(`text has changed. Old Value: ${mutationRecord.oldValue} New value: ${mutationRecord.target.nodeValue}`)
+                }
+
+            })
+        });
+        observer.observe(myList, {
+            // attributes: true,
+            // attributeFilter: ['class'],
+            // attributeOldValue: true
+
+            // Works for both adding / removing child list or text content/ inner html
+            childList: true
+        });
+
+        // observer.observe(myList.firstElementChild, {
+        //     childList: true
+        // });
+
+        // character data / text observe on node. Wont remove/add nodes, but updates it
+        // observer.observe(myList.firstElementChild.childNodes[0], {
+        //     characterData: true,
+        //     characterDataOldValue: true
+        // });
+
+        // listens for changes on all child nodes attributes and parent
+        observer.observe(myList, {
+            subtree: true,
+            attributes: true
+        });
+
+        // stop observing changes
+        setTimeout(() => {
+            observer.disconnect();
+        }, 5000);
+
+        setTimeout(() => {
+            // myList.setAttribute('id', 'randomId');
+            // myList.setAttribute('class', 'summary class');
+
+            // myList.removeChild(myList.firstElementChild);
+            // const newLi = document.createElement('li');
+            // newLi.textContent = 'Hey How are you?';
+            // myList.appendChild(newLi);
+
+            // text content or inner html, but internally removes old node and adds new node
+            // myList.firstElementChild.textContent = 'Hello There';
+            // myList.firstElementChild.innerHTML = 'and something else';
+            // if innerHTML is passed as eg : ,<br>and something else</br> it makes it as 2 nodes added
+
+            // myList.firstElementChild.firstChild.nodeValue = 'Hows it going?';
+
+            myList.setAttribute('id', 'randomId');
+            myList.firstElementChild.setAttribute('id', 'anotherId');
+        }, 2000);
+    </script>
+</body>
+
+</html>
